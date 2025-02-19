@@ -7,6 +7,7 @@ from numpy import expand_dims
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import tensorflow as tf
+from skimage.color import gray2rgb
 
 from mrcnn.config import Config
 from mrcnn.model import MaskRCNN
@@ -19,8 +20,8 @@ config.gpu_options.allow_growth = True
 session = tf.compat.v1.Session(config=config)
 
 
-global _model
-global _graph
+global _model # mrcnn.model.MaskRCNN
+global _graph # tensorflow.python.framework.ops.Graph
 global cfg
 ROOT_DIR = os.path.abspath("./")
 WEIGHTS_FOLDER = "./weights"
@@ -28,8 +29,6 @@ MODEL_NAME = "mask_rcnn_hq"
 WEIGHTS_FILE_NAME = 'maskrcnn_15_epochs.h5'
 
 sys.path.append(ROOT_DIR)
-
-
 
 application = Flask(__name__)
 cors = CORS(application, resources={r"/*": {"origins": "*"}})
@@ -59,28 +58,13 @@ def myImageLoader(imageInput):
 	image = asarray(imageInput)
 	h, w, c = image.shape
 	if image.ndim != 3:
-		image = skimage.color.gray2rgb(image)
+		image = gray2rgb(image)
 		if image.shape[-1] == 4:
 			image = image[..., :3]
 	return image, w, h
 
 
-def getClassNames(classIds):
-	result = list()
-	for classid in classIds:
-		data = {}
-		if classid == 1:
-			data['name'] = 'wall'
-		if classid == 2:
-			data['name'] = 'window'
-		if classid == 3:
-			data['name'] = 'door'
-		result.append(data)
-
-	return result
-
-
-def normalizePoints(bbx, classNames):
+def normalize_points(bbx, classNames):
 	normalizingX = 1
 	normalizingY = 1
 	result = list()
@@ -103,17 +87,33 @@ def normalizePoints(bbx, classNames):
 	return result, (doorDifference/doorCount)
 
 
-def turnSubArraysToJson(objectsArr):
-	result = list()
-	for obj in objectsArr:
-		data = {}
-		data['x1'] = obj[1]
-		data['y1'] = obj[0]
-		data['x2'] = obj[3]
-		data['y2'] = obj[2]
-		result.append(data)
-	return result
+def get_primitive(ai_data):
+	data = []
+	for it in range(len(ai_data['class_ids'])):
+		obj_points = ai_data['rois'][it].tolist()
+		class_id = ai_data['class_ids'][it]
+		
+		coordinates = {
+			'x1': obj_points[1],
+			'y1': obj_points[0],
+			'x2': obj_points[3],
+			'y2': obj_points[2],
+		}
 
+		if  class_id == 1:
+			elements = 'wall'
+		elif class_id == 2:
+			elements = 'window'
+		elif class_id == 3:
+			elements = 'door'
+
+		obj = {
+			'name': elements,
+			'coordinates': coordinates,
+			}
+		data.append(obj)
+
+	return data
 
 @application.route('/', methods=['POST'])
 def prediction():
@@ -127,26 +127,20 @@ def prediction():
 	except:
 		return jsonify(mock_data)
 
-	image, w, h = myImageLoader(imagefile)
+	image, image_width, image_height = myImageLoader(imagefile)
 	scaled_image = mold_image(image, cfg)
 	sample = expand_dims(scaled_image, 0)
 
 	with _graph.as_default():
-		r = _model.detect(sample, verbose=0)[0]
-
-	# output_data = model_api(imagefile)
-
-	bbx = r['rois'].tolist()
-	temp, averageDoor = normalizePoints(bbx, r['class_ids'])
-	temp = turnSubArraysToJson(temp)
-	data['points'] = temp
-	data['classes'] = getClassNames(r['class_ids'])
-	data['Width'] = w
-	data['Height'] = h
-	data['averageDoor'] = averageDoor
-
-	return jsonify(data)
-
+		ai_data = _model.detect(sample, verbose=0)[0]
+	primitive = get_primitive(ai_data)
+	
+	data = {
+		'primitive': primitive,
+		'width': image_width,
+		'height': image_height,
+	}
+	return data
 
 if __name__ == '__main__':
 	application.debug = env('FLASK_DEBUG')
