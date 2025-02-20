@@ -11,4 +11,4 @@ env
 __pycache__/
 /tmp
 
-weights/maskrcnn_15_epochs.h5
+server_ai_old/weights/maskrcnn_15_epochs.h5
