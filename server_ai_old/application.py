@@ -136,7 +136,7 @@ def prediction():
 	primitive = get_primitive(ai_data)
 	
 	data = {
-		'primitive': primitive,
+		'primitives': primitive,
 		'width': image_width,
 		'height': image_height,
 	}
