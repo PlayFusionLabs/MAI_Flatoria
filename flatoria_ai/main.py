@@ -1,7 +1,9 @@
+import os
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
 
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
 model = keras.Sequential([
     layers.Conv2D(32, (3,3), activation="relu", input_shape=(224, 224, 3)),
@@ -17,4 +19,4 @@ model = keras.Sequential([
 
 
 model.compile(optimizer="adam", loss="sparse_categorical_crossentropy", metrics=["accuracy"])
-model.save("primitives_model.h5")
+model.save("./models/primitives_model.h5")
