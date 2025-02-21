@@ -23,10 +23,10 @@ for image_file in image_files:
         continue
 
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)  
-    cv2.imwrite(os.path.join(output_folder, f"{os.path.splitext(image_file)[0]}_gray.png"), gray)  # Зберігаємо ч/б копію
+    cv2.imwrite(os.path.join(output_folder, f"{os.path.splitext(image_file)[0]}_gray.png"), gray)  
 
     _, thresh = cv2.threshold(gray, 200, 255, cv2.THRESH_BINARY_INV)  
-    contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)  
+    contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_TC89_KCOS)  
 
     image_output_folder = os.path.join(output_folder, os.path.splitext(image_file)[0])
     if not os.path.exists(image_output_folder):
@@ -36,13 +36,15 @@ for image_file in image_files:
 
     for i, cnt in enumerate(contours):  
         x, y, w, h = cv2.boundingRect(cnt)  
-
-        if w > 50 and h > 50:
+        if w > 20 and h > 20:
             roi = gray[y:y+h, x:x+w]  
             unique_id = str(uuid.uuid4())[:8]
             output_path = os.path.join(image_output_folder, f"cropped_{i}_{unique_id}.png")
+            dim = (250, 250)
+            roi = cv2.resize(roi,dim, interpolation = cv2.INTER_AREA )
             cv2.imwrite(output_path, roi)  
             found_count += 1
+            
 
     print(f"Processed: {image_file}, Found {found_count} objects.")
 

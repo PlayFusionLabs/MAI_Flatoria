@@ -3,12 +3,14 @@
 /.idea
 /venv
 /.venv
-/.env
-env
+# /.env
+# env
 /.vscode
 /*/.env
 /.DS_Store
 __pycache__/
 /tmp
-
+cropped_output
+input_images
+flatoria_ai/models/primitives_model.h5
 server_ai_old/weights/maskrcnn_15_epochs.h5
