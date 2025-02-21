@@ -46,3 +46,9 @@ python main.py
 ```
 
 ## Model 
+```bash
+python model.py      # create model
+python train.py      # train model
+python predict.py    # 
+
+```
