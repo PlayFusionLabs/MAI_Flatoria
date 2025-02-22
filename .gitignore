@@ -14,3 +14,4 @@ cropped_output
 input_images
 flatoria_ai/models/primitives_model.h5
 server_ai_old/weights/maskrcnn_15_epochs.h5
+
