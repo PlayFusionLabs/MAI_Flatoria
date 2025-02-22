@@ -1,2 +1,2 @@
-tensorflow
-matplotlib
+tensorflow==2.18.0
+Pillow==11.1.0

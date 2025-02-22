@@ -23,10 +23,12 @@ git clone git@github.com:PlayFusionLabs/MAI_Flatoria.git
 2.  **Create and activate a new conda environment**:
 
 ```bash
-conda create --name flatoriaAI_py310 python=3.10
+conda create --name flatoriaAI_py3_9 python=3.9.21
 conda env list
-conda activate flatoriaAI_py310
+conda activate flatoriaAI_py3_9
 conda deactivate
+conda remove --name flatoriaAI_py3_9 --all
+conda env list
 
 ```
 3.  **Install dependencies**:
@@ -38,17 +40,8 @@ pip install -r requirements.txt
 
 [Model AI ](https://drive.google.com/file/....TODO)
 
-5.  **Start the server**:
-
-```bash
-python main.py
-
-```
 
 ## Model 
 ```bash
-python model.py      # create model
-python train.py      # train model
-python predict.py    # 
-
+python main.py      # create model
 ```

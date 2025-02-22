@@ -20,7 +20,7 @@ def predict_image(img_path, model_path):
 
 if __name__ == "__main__":
     MODEL_PATH = "./models/primitives_model.h5"
-    IMG_PATH = "dataset/test/sample.jpg"
+    IMG_PATH = "./dataset/test/sample.jpg"
 
     predicted_class = predict_image(IMG_PATH, MODEL_PATH)
     print(f"Predicted class: {predicted_class}")
